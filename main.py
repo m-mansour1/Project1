@@ -1,5 +1,5 @@
 # Movie Database Manager
-
+from rich import print
 MOVIE_FILE = "movies.txt"
 
 def read_movies():
@@ -22,15 +22,36 @@ def add_movie():
     title = input("Enter the movie title: ")
     movie_type = input("Enter the movie type (Feature Film, TV Series, etc.): ")
     director = input("Enter the director's name: ")
-    rating = input("Enter the IMDb rating: ")
-    duration = input("Enter the duration in minutes: ")
-    year = input("Enter the release year: ")
+
+    # Validate IMDb Rating (ensure it's a float)
+    while True:
+        rating = input("Enter the IMDb rating: ")
+        try:
+            rating = str(float(rating))  # Convert to float and back to string for consistency
+            break
+        except ValueError:
+            print("Invalid input! IMDb rating must be a number.")
+
+    # Validate duration (ensure it's an integer)
+    while True:
+        duration = input("Enter the duration in minutes: ")
+        if duration.isdigit():
+            break
+        print("Invalid input! Duration must be an integer.")
+
+    while True:
+        year = input("Enter the release year: ")
+        if year.isdigit():
+            break
+        print("Invalid input! Duration must be an integer.")
+        
     genre = input("Enter the genre (comma-separated): ")
     votes = input("Enter the number of votes: ")
+
     movies = read_movies()
     movies.append([title, movie_type, director, rating, duration, year, genre, votes, " ", " ", " "])
     write_movies(movies)
-    print(f"Movie '{title}' added successfully.")
+    print(f"Movie '{title}' added successfully!")
 
 def search_movie():
     """Searches for a movie by title or director."""
@@ -56,7 +77,7 @@ def filter_movies():
         results = [movie for movie in movies if movie[5] == year]
     elif filter_type == "rating":
         min_rating = float(input("Enter the minimum rating: "))
-        results = [movie for movie in movies if float(movie[3]) >= min_rating]
+        results = [movie for movie in movies if movie[3].strip() and movie[3].replace('.', '', 1).isdigit() and float(movie[3]) >= min_rating]
     else:
         print("Invalid filter type.")
         return
@@ -68,18 +89,62 @@ def filter_movies():
         print("No movies matched the criteria.")
 
 def update_movie():
-    """Updates movie details."""
-    title = input("Enter the title of the movie to update: ").lower()
+    """Updates all details of an existing movie."""
+    title = input("Enter the title of the movie to update: ").strip().lower()
     movies = read_movies()
+
     for movie in movies:
-        if movie[0].lower() == title:
-            print(f"Current details: {movie}")
-            movie[3] = input(f"Enter new IMDb rating (current: {movie[3]}): ") or movie[3]
-            movie[4] = input(f"Enter new duration (current: {movie[4]}): ") or movie[4]
+        if movie[0].strip().lower() == title:
+            print(f"\nCurrent details: {movie}\n")
+
+            movie[0] = input(f"Enter new title (current: {movie[0]}): ").strip() or movie[0]
+            movie[1] = input(f"Enter new type (current: {movie[1]}): ").strip() or movie[1]
+            movie[2] = input(f"Enter new director (current: {movie[2]}): ").strip() or movie[2]
+
+            # Validate IMDb Rating
+            while True:
+                new_rating = input(f"Enter new IMDb rating (current: {movie[3]}): ").strip()
+                if not new_rating:
+                    break
+                try:
+                    movie[3] = str(float(new_rating))  # Ensure it's stored as a valid float
+                    break
+                except ValueError:
+                    print("Invalid input! IMDb rating must be a number.")
+
+            # Validate Duration
+            while True:
+                new_duration = input(f"Enter new duration in minutes (current: {movie[4]}): ").strip()
+                if not new_duration:
+                    break
+                if new_duration.isdigit():
+                    movie[4] = new_duration
+                    break
+                print("Invalid input! Duration must be an integer.")
+                
+            while True:
+                release_year = input(f"Enter new release year (current: {movie[5]}): ").strip()
+                if not release_year:
+                    break
+                if release_year.isdigit():
+                    movie[5] = release_year
+                    break
+                print("Invalid input! Duration must be an integer.")
+
+            movie[6] = input(f"Enter new genre(s) (current: {movie[6]}): ").strip() or movie[6]
+            movie[7] = input(f"Enter new number of votes (current: {movie[7]}): ").strip() or movie[7]
+            movie[8] = input(f"Enter new box office revenue (current: {movie[8]}): ").strip() or movie[8]
+            movie[9] = input(f"Enter new Oscar win status (current: {movie[9]}): ").strip() or movie[9]
+            movie[10] = input(f"Enter new IMDb URL (current: {movie[10]}): ").strip() or movie[10]
+            movie[11] = input(f"Enter new additional notes (current: {movie[11]}): ").strip() or movie[11]
+
             write_movies(movies)
-            print(f"Movie '{movie[0]}' updated successfully.")
+            print(f"\nMovie '{movie[0]}' updated successfully!\n")
+            print(f"Updated details: {movie}")
             return
+
     print("Movie not found.")
+
 
 def analyze_movies():
     """Analyze and display statistics about the movie database."""
